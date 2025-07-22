@@ -306,7 +306,8 @@ public class ManageFileScreenFragment extends Fragment {
             Utils.showLogDMessage(InformationTransferManager.getStringResource(R.string.notice_tag), InformationTransferManager.getStringResource(R.string.notice_text), false);
 
             // if the service active set the status
-            if(MainScreenFragment.isServiceActivated){
+            boolean isServiceActivated = ((MainActivity) requireActivity()).isServiceActivated();
+            if(isServiceActivated){
                 setServiceStatus();
             }
         }
@@ -316,8 +317,8 @@ public class ManageFileScreenFragment extends Fragment {
      * This method sets the service status.
      */
     private void setServiceStatus(){
-        ((MainActivity) requireActivity()).startStopHostCardEmulatorService(MainScreenFragment.isServiceActivated);
-        MainScreenFragment.isServiceActivated = !MainScreenFragment.isServiceActivated;
+        boolean isServiceActivated = ((MainActivity) requireActivity()).isServiceActivated();
+        ((MainActivity) requireActivity()).startStopHostCardEmulatorService(!isServiceActivated);
     }
 
     /**

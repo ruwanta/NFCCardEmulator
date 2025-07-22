@@ -15,11 +15,19 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.view.KeyEvent;
 import android.view.View;
 
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
+import com.okanatas.nfccardemulator.control.Command;
+import com.okanatas.nfccardemulator.control.ControlCommandListener;
+import com.okanatas.nfccardemulator.control.SetActiveFileCommand;
+import com.okanatas.nfccardemulator.control.StartServiceCommand;
+import com.okanatas.nfccardemulator.control.StopServiceCommand;
+import com.okanatas.nfccardemulator.control.WebSocketServerConnection;
 import com.okanatas.nfccardemulator.databinding.ActivityMainBinding;
 
 import android.view.Menu;
@@ -44,6 +52,7 @@ public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding binding;
     AlertDialog.Builder dialogBuilder;
     public static String FILE_NAME;
+    private boolean isServiceActivated = false;
 
     /**
      * When the application is still working, it starts a different activity and the application is informed about the result.
@@ -81,6 +90,10 @@ public class MainActivity extends AppCompatActivity {
 
         // set application files directory
         InformationTransferManager.setAppFilesDirectory(String.valueOf(getFilesDir()));
+
+        EmulatorApplication application = EmulatorApplication.getInstance();
+        WebSocketServerConnection webSocketServerConnection = application.getWebSocketServerConnection();
+        webSocketServerConnection.addControlCommandListener(controlCommandListener);
     }
 
     /**
@@ -146,12 +159,18 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(this, HostCardEmulatorService.class);
 
         if(!isServiceActivated){
+            this.isServiceActivated = true;
             startService(intent);
             Utils.showLogDMessage(InformationTransferManager.getStringResource(R.string.start_service_tag), InformationTransferManager.getStringResource(R.string.start_service_text), false);
         }else{
+            this.isServiceActivated = false;
             stopService(intent);
             Utils.showLogDMessage(InformationTransferManager.getStringResource(R.string.stop_service_tag), InformationTransferManager.getStringResource(R.string.stop_service_text), false);
         }
+    }
+
+    public boolean isServiceActivated() {
+        return isServiceActivated;
     }
 
     /**
@@ -273,5 +292,56 @@ public class MainActivity extends AppCompatActivity {
         AlertDialog alert = dialogBuilder.create();
         alert.setTitle(InformationTransferManager.getStringResource(R.string.dialog_box_title));
         alert.show();
+    }
+
+    private ControlCommandListener controlCommandListener = new ControlCommandListener() {
+
+        @Override
+        public void onCommandReceived(Command command) {
+            if (command instanceof StartServiceCommand) {
+                Utils.showLogDMessage(InformationTransferManager.getStringResource(R.string.start_service_tag), InformationTransferManager.getStringResource(R.string.start_service_text), false);
+                startStopHostCardEmulatorService(false);
+            } else if (command instanceof StopServiceCommand) {
+                Utils.showLogDMessage(InformationTransferManager.getStringResource(R.string.stop_service_tag), InformationTransferManager.getStringResource(R.string.stop_service_text), false);
+                startStopHostCardEmulatorService(true);
+            } else if (command instanceof SetActiveFileCommand) {
+                SetActiveFileCommand setActiveFileCommand = (SetActiveFileCommand) command;
+                String fileContentInText = setActiveFileCommand.getContent();
+                /**
+                 * Sets the active file content to be used in the subsequent NFC interaction
+                 * @param view
+                 * @param fileContentInText
+                 */
+                FileHandler.setCommandsAndResponses(fileContentInText);
+
+                // set command size
+                InformationTransferManager.setCommandSize(FileHandler.commands.size());
+                // set response size
+                InformationTransferManager.setResponseSize(FileHandler.responses.size());
+
+                Utils.showLogDMessage(InformationTransferManager.getStringResource(R.string.select_file_tag), "\"" + "Test" + "\" "
+                        + InformationTransferManager.getStringResource(R.string.snack_bar_message_3) + " "
+                        + InformationTransferManager.getStringResource(R.string.snack_bar_message_4) + " "
+                        + InformationTransferManager.getCommandSize() + " "
+                        + InformationTransferManager.getStringResource(R.string.snack_bar_message_5) + " "
+                        + InformationTransferManager.getResponseSize(), false);
+                }
+                refreshFragment();
+            }
+
+    };
+
+    private void refreshFragment() {
+        Fragment currentFragment = getSupportFragmentManager()
+                .findFragmentById(R.id.nav_host_fragment_content_main);
+
+        if (currentFragment != null) {
+            FragmentTransaction ft = getSupportFragmentManager()
+                    .beginTransaction();
+            ft.detach(currentFragment);
+            ft.attach(currentFragment);
+            ft.commit();
+        }
+
     }
 }

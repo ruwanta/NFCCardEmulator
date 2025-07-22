@@ -8,6 +8,7 @@
     <uses-permission
         android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         android:maxSdkVersion="28" />
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <!--  Requirement for the HCE hardware, the app only installs on phones that can run the HCE  -->
     <uses-feature
@@ -15,6 +16,7 @@
         android:required="true" />
 
     <application
+        android:name=".EmulatorApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"

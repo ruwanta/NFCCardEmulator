@@ -25,7 +25,6 @@ import com.okanatas.nfccardemulator.databinding.FragmentMainScreenBinding;
 public class MainScreenFragment extends Fragment {
 
     private FragmentMainScreenBinding binding;
-    public static boolean isServiceActivated = false;
     LinearLayout communicationLogsLinearLayout;
 
     @SuppressLint("StaticFieldLeak")
@@ -51,8 +50,9 @@ public class MainScreenFragment extends Fragment {
 
         instance = this;
 
+        boolean isServiceActivated = ((MainActivity) requireActivity()).isServiceActivated();
         // when view fully created
-        binding.currentlyService.setText(InformationTransferManager.getServiceStatus());
+        binding.currentlyService.setText(InformationTransferManager.getServiceStatus(isServiceActivated));
         binding.selectedFileText.setText(InformationTransferManager.getSelectedFileText());
 
         binding.buttonStartStopService.setOnClickListener(this::controlHostCardEmulatorService);
@@ -90,15 +90,16 @@ public class MainScreenFragment extends Fragment {
      * This method sets the service status.
      */
     private void setServiceStatus(){
+        boolean isServiceActivated = ((MainActivity) requireActivity()).isServiceActivated();
         ((MainActivity) requireActivity()).startStopHostCardEmulatorService(isServiceActivated);
-        isServiceActivated = !isServiceActivated;
-        binding.currentlyService.setText(InformationTransferManager.getServiceStatus());
+        binding.currentlyService.setText(InformationTransferManager.getServiceStatus(isServiceActivated));
     }
 
     /**
      * This method reorganizes the service button.
      */
     private void reorganizeStartStopServiceButton(){
+        boolean isServiceActivated = ((MainActivity) requireActivity()).isServiceActivated();
         if(isServiceActivated){
             binding.buttonStartStopService.setBackground(ContextCompat.getDrawable(requireContext(), R.drawable.rounded_corners_color_green));
             binding.buttonStartStopService.setText(R.string.button_stop_service);

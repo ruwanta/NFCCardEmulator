@@ -60,8 +60,8 @@ public class InformationTransferManager {
      * This method gets the current status of the HCE service.
      * @return the current status of the HCE service.
      */
-    public static String getServiceStatus(){
-        return MainScreenFragment.isServiceActivated ? getStringResource(R.string.service_started) : getStringResource(R.string.service_stopped);
+    public static String getServiceStatus(boolean status){
+        return status ? getStringResource(R.string.service_started) : getStringResource(R.string.service_stopped);
     }
 
     /**
