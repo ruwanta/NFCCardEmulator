@@ -95,6 +95,13 @@ public class MainScreenFragment extends Fragment {
         binding.currentlyService.setText(InformationTransferManager.getServiceStatus(isServiceActivated));
     }
 
+    public void refreshScreen() {
+       getActivity().runOnUiThread(() -> {
+           reorganizeStartStopServiceButton();
+           binding.currentlyService.setText(InformationTransferManager.getServiceStatus(((MainActivity) requireActivity()).isServiceActivated()));
+           binding.selectedFileText.setText(InformationTransferManager.getSelectedFileText());
+        });
+    }
     /**
      * This method reorganizes the service button.
      */

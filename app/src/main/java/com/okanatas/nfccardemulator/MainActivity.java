@@ -16,9 +16,9 @@ import android.view.KeyEvent;
 import android.view.View;
 
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentTransaction;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
+import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
@@ -314,6 +314,7 @@ public class MainActivity extends AppCompatActivity {
                  */
                 FileHandler.setCommandsAndResponses(fileContentInText);
 
+                InformationTransferManager.setSelectedFileText("Remote Upload");
                 // set command size
                 InformationTransferManager.setCommandSize(FileHandler.commands.size());
                 // set response size
@@ -332,16 +333,18 @@ public class MainActivity extends AppCompatActivity {
     };
 
     private void refreshFragment() {
-        Fragment currentFragment = getSupportFragmentManager()
+
+        NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.nav_host_fragment_content_main);
 
-        if (currentFragment != null) {
-            FragmentTransaction ft = getSupportFragmentManager()
-                    .beginTransaction();
-            ft.detach(currentFragment);
-            ft.attach(currentFragment);
-            ft.commit();
-        }
+        if (navHostFragment != null) {
+            Fragment currentFragment = navHostFragment.getChildFragmentManager()
+                    .getPrimaryNavigationFragment();
 
+            if (currentFragment instanceof MainScreenFragment) {
+                ((MainScreenFragment) currentFragment)
+                        .refreshScreen();
+            }
+        }
     }
 }
