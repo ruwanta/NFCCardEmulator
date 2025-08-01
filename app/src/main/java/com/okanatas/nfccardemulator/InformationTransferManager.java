@@ -178,7 +178,7 @@ public class InformationTransferManager {
      * @return value of the resource in String format
      */
     public static String getStringResource(int resource){
-        return MainScreenFragment.getInstance().requireContext().getResources().getString(resource);
+        return EmulatorApplication.getInstance().getApplicationContext().getResources().getString(resource);
     }
 
     /**
@@ -187,6 +187,6 @@ public class InformationTransferManager {
      * @return value of the resource in float format
      */
     public static float getDimenResource(int resource){
-        return MainScreenFragment.getInstance().requireContext().getResources().getDimension(resource);
+        return EmulatorApplication.getInstance().getApplicationContext().getResources().getDimension(resource);
     }
 }

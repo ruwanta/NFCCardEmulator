@@ -254,6 +254,7 @@ public class ManageFileScreenFragment extends Fragment {
             MainActivity.FILE_NAME = fileOnSpinner;
             String fileContentInText = ((MainActivity) requireActivity()).readFromFile(view);
             FileHandler.setCommandsAndResponses(fileContentInText);
+            EmulatorApplication.getInstance().getRequestResponseFlow().setCommandsAndResponses(fileContentInText);
 
             // set command size
             InformationTransferManager.setCommandSize(FileHandler.commands.size());
@@ -300,6 +301,7 @@ public class ManageFileScreenFragment extends Fragment {
             FileHandler.commands.clear();
             FileHandler.responses.clear();
 
+            EmulatorApplication.getInstance().getRequestResponseFlow().clear();
             // set selected file for no file
             InformationTransferManager.setSelectedFileText("");
             // notice

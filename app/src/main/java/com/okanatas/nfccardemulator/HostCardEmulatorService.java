@@ -2,6 +2,8 @@ package com.okanatas.nfccardemulator;
 
 import android.nfc.cardemulation.HostApduService;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 
 /**
  * This class was created for the Host Based Card Emulator Service.
@@ -16,6 +18,14 @@ public class HostCardEmulatorService extends HostApduService {
     private static final String COM_TAG = "\n" + InformationTransferManager.getStringResource(R.string.communication_tag);
     private static boolean isNewCommunication = true;
 
+    private ResponseHandler2 responseHandler;
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        responseHandler = new ResponseHandler2(EmulatorApplication.getInstance().getRequestResponseFlow());
+    }
+
     /**
      * This method was created to take that command the terminal sends,
      * and then send back a response in the format that the terminal requires.
@@ -25,7 +35,9 @@ public class HostCardEmulatorService extends HostApduService {
      */
     @Override
     public byte[] processCommandApdu(byte[] commandApdu, Bundle extras) {
-        byte[] responseApdu;
+        byte[] responseApdu = null;
+
+        RequestResponse requestResponse = null;
 
         if(commandApdu != null){
 
@@ -33,39 +45,39 @@ public class HostCardEmulatorService extends HostApduService {
 
             if((hexCommandApdu.length() < ISOProtocol.MIN_APDU_LENGTH) || (hexCommandApdu.length() % 2 != 0)){
                 responseApdu = Utils.hexStringToByteArray(ISOProtocol.SW_COMMAND_ABORTED);
-                ResponseHandler.setSelectedInsDescription(InformationTransferManager.getStringResource(R.string.command_aborted_with_reason));
+                ResponseHandler2.setSelectedInsDescription(InformationTransferManager.getStringResource(R.string.command_aborted_with_reason));
             }else {
                 /* Switch for INS : this is the index 1 for commandApdu byte array */
                 switch (hexCommandApdu.substring(2, 4)) {
                     case ISOProtocol.INS_SELECT:
-                        responseApdu = ResponseHandler.selectCase(hexCommandApdu);
+                        requestResponse = responseHandler.selectCase(hexCommandApdu);
                         break;
                     case ISOProtocol.INS_READ_BINARY:
-                        responseApdu = ResponseHandler.readBinaryCase();
+                        responseApdu = ResponseHandler2.readBinaryCase();
                         break;
                     case ISOProtocol.INS_WRITE_BINARY:
-                        responseApdu = ResponseHandler.writeBinaryCase();
+                        responseApdu = ResponseHandler2.writeBinaryCase();
                         break;
                     case ISOProtocol.INS_UPDATE_BINARY:
-                        responseApdu = ResponseHandler.updateBinaryCase();
+                        responseApdu = ResponseHandler2.updateBinaryCase();
                         break;
                     case ISOProtocol.INS_READ_RECORD:
-                        responseApdu = ResponseHandler.readRecordCase(hexCommandApdu);
+                        requestResponse = responseHandler.readRecordCase(hexCommandApdu);
                         break;
                     case ISOProtocol.INS_READ_NDEF:
-                        responseApdu = ResponseHandler.readNdefCase();
+                        responseApdu = ResponseHandler2.readNdefCase();
                         break;
                     case ISOProtocol.INS_PERFORM_SECURITY_OPERATION:
-                        responseApdu = ResponseHandler.performSecurityOperationCase();
+                        responseApdu = ResponseHandler2.performSecurityOperationCase();
                         break;
                     case ISOProtocol.INS_GET_PROCESSING_OPTIONS:
-                        responseApdu = ResponseHandler.getProcessingOptionCase(hexCommandApdu);
+                        requestResponse = responseHandler.getProcessingOptionCase(hexCommandApdu);
                         break;
                     case ISOProtocol.INS_GENERATE_APPLICATION_CRYPTOGRAM:
-                        responseApdu = ResponseHandler.generateApplicationCryptogramCase();
+                        responseApdu = ResponseHandler2.generateApplicationCryptogramCase();
                         break;
                     case ISOProtocol.INS_GET_DATA:
-                        responseApdu = ResponseHandler.getDataCase();
+                        responseApdu = ResponseHandler2.getDataCase();
                         break;
                     default:
                         responseApdu = Utils.hexStringToByteArray(ISOProtocol.SW_INS_NOT_SUPPORTED_OR_INVALID);
@@ -77,7 +89,22 @@ public class HostCardEmulatorService extends HostApduService {
         }
 
         String commandApduInHex = (commandApdu != null) ? (Utils.toHexString(commandApdu)) : (InformationTransferManager.getStringResource(R.string.null_command));
-        handleCommunicationMessage(commandApduInHex, Utils.toHexString(responseApdu));
+
+        if(requestResponse != null) {
+            //Handled response with delay
+            responseApdu = requestResponse.getResponseApdu();
+            long delay = requestResponse.getDelay();
+            if(delay < 0) {
+                delay = 0; // Ensure non-negative delay
+            } else {
+                final String responseApduInHex = Utils.toHexString(responseApdu);
+                new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                    handleCommunicationMessage(commandApduInHex, responseApduInHex);
+                }, delay); // Delay in milliseconds
+            }
+        } else {
+            handleCommunicationMessage(commandApduInHex, Utils.toHexString(responseApdu));
+        }
 
         /* return the response APDU */
         return responseApdu;
@@ -110,7 +137,7 @@ public class HostCardEmulatorService extends HostApduService {
         }
 
         Utils.showLogDMessage(C_TAG, commandApduInHex, true);
-        Utils.showLogDMessage(C_TAG, ResponseHandler.getSelectedInsDescription(), false);
+        Utils.showLogDMessage(C_TAG, ResponseHandler2.getSelectedInsDescription(), false);
         Utils.showLogDMessage(R_TAG, responseApduInHex, true);
 
         InformationTransferManager.appendCardCommunicationMessage(InformationTransferManager.getStringResource(R.string.apdu_c) + commandApduInHex);

@@ -9,6 +9,7 @@
     <!--  File Handler Class  -->
     <string name="c_apdu_keyword">c-apdu</string>
     <string name="r_apdu_keyword">r-apdu</string>
+    <string name="delay_keyword">delay</string>
 
     <string name="command_from_file_text">Command From File</string>
     <string name="response_from_file_text">Response From File</string>

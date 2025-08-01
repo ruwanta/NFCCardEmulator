@@ -12,13 +12,14 @@ public class EmulatorApplication extends Application {
 
     private static EmulatorApplication instance;
     private WebSocketServerConnection webSocketServerConnection;
-
+    private RequestResponseFlow requestResponseFlow;
 
     @Override
     public void onCreate() {
         super.onCreate();
         instance = this;
 
+        requestResponseFlow = new RequestResponseFlow();
         InetSocketAddress bindAddress = new InetSocketAddress("0.0.0.0", 6666);
 
         webSocketServerConnection = new WebSocketServerConnection(bindAddress);
@@ -46,5 +47,9 @@ public class EmulatorApplication extends Application {
      */
     public static EmulatorApplication getAppContext() {
         return instance;
+    }
+
+    public RequestResponseFlow getRequestResponseFlow() {
+        return requestResponseFlow;
     }
 }

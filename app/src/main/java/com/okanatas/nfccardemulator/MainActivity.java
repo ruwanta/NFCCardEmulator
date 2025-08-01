@@ -314,6 +314,9 @@ public class MainActivity extends AppCompatActivity {
                  */
                 FileHandler.setCommandsAndResponses(fileContentInText);
 
+                EmulatorApplication application = EmulatorApplication.getInstance();
+                application.getRequestResponseFlow().setCommandsAndResponses(fileContentInText);
+
                 InformationTransferManager.setSelectedFileText("Remote Upload");
                 // set command size
                 InformationTransferManager.setCommandSize(FileHandler.commands.size());
