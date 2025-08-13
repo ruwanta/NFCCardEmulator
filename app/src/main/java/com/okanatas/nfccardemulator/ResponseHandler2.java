@@ -31,7 +31,7 @@ public class ResponseHandler2 {
         RequestResponse requestResponse = requestResponseFlow.getRequestResponse(hexCommandApdu);
         if(requestResponse == null) {
             requestResponse = createDefaultResponse(hexCommandApdu, ISOProtocol.SW_FILE_NOT_FOUND);
-            Utils.showLogDMessage(InformationTransferManager.getStringResource(R.string.invalid_message_1), InformationTransferManager.getStringResource(R.string.invalid_message_2), false);
+            Utils.showLogDMessage(InformationTransferManager.getStringResource(R.string.invalid_message_1), InformationTransferManager.getStringResource(R.string.invalid_message_1), false);
         }
         return requestResponse;
     }

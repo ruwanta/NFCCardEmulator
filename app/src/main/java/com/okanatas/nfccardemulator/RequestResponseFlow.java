@@ -28,45 +28,104 @@ public class RequestResponseFlow {
         // clear ArrayList elements for a new file initialization
         Map<String, RequestResponse> newMap = new HashMap<>();
 
-        // remove all white spaces for organization purpose
-        fileContentInText = fileContentInText.replaceAll("\\s","");
 
         // store the organized content line by line
         String[] lines = fileContentInText.split("\\r?\\n");
 
         // determine which line is command and which is response and store it to ArrayList.
-        for (String line : lines) {
-            String[] parsedLine = line.split(":");
-            String command = null;
-            String response = null;
-            long delay = 0;
-            String keyword = parsedLine[0];
 
-            if (keyword.equalsIgnoreCase(COMMAND_KEYWORD)) {
-                if((parsedLine[1].length() % 2 == 0) || (parsedLine[1].length() >= ISOProtocol.MIN_APDU_LENGTH)){
-                    command = parsedLine[1];
-                }
-            } else if (keyword.equalsIgnoreCase(RESPONSE_KEYWORD)) {
-                if((parsedLine[1].length() % 2) == 0){
-                    response = parsedLine[1];
-                }
-            } else if (keyword.equalsIgnoreCase(DELAY_KEYWORD)) {
-                if((parsedLine[1].length() % 2) == 0){
-                    String ln = parsedLine[1];
-                    try{
-                        delay = Long.parseLong(ln);
-                    } catch (NumberFormatException e) {
-                        Log.e("RequestResponseFlow", "Invalid delay value: " + ln, e);
-                    }
-                }
+        ParserContext parserContext = new ParserContext();
+        parserContext.lines = lines;
+        parserContext.index = 0;
+        readCommandsAndResponses(parserContext, newMap);
+
+        requestResponseMap = newMap;
+    }
+
+    /**
+     * Reads commands and responses from the parser context and populates the request-response map.
+     * @param parserContext
+     * @param newMap
+     */
+    private void readCommandsAndResponses(ParserContext parserContext, Map<String, RequestResponse> newMap) {
+        String line = parserContext.lines[parserContext.index].trim();
+        String[] parsedLine = line.split(":");
+        String command = null;
+
+        String keyword = parsedLine[0];
+        parserContext.command = command;
+        if (keyword.equalsIgnoreCase(COMMAND_KEYWORD)) {
+            if((parsedLine[1].length() % 2 == 0) || (parsedLine[1].length() >= ISOProtocol.MIN_APDU_LENGTH)){
+                command = parsedLine[1];
             }
-
-            if (command != null && response != null) {
-                RequestResponse requestResponse = new RequestResponse(command, response, delay);
-                newMap.put(command, requestResponse);
+        }
+        if(command != null) {
+            int index = parserContext.index;
+            parserContext.command = command;
+            if (index + 1 < parserContext.lines.length) {
+                parserContext.index = index + 1;
+                readDelayAndResponses(parserContext, newMap);
             } else {
                 Utils.showLogDMessage(InformationTransferManager.getStringResource(R.string.invalid_message_1), InformationTransferManager.getStringResource(R.string.invalid_message_2), false);
             }
+        } else {
+            Utils.showLogDMessage(InformationTransferManager.getStringResource(R.string.invalid_message_1), InformationTransferManager.getStringResource(R.string.invalid_message_2), false);
+        }
+    }
+
+    /**
+     * Reads delay and responses from the parser context and populates the request-response map.
+     * @param parserContext
+     * @param newMap
+     */
+    private void readDelayAndResponses(ParserContext parserContext, Map<String, RequestResponse> newMap) {
+        String line = parserContext.lines[parserContext.index].trim();
+        String[] parsedLine = line.split(":");
+
+        long delay = 0;
+        String keyword = parsedLine[0];
+        parserContext.delay = 0;
+        if (keyword.equalsIgnoreCase(DELAY_KEYWORD)) {
+            if((parsedLine[1].length() % 2) == 0){
+                String ln = parsedLine[1];
+                try{
+                    delay = Long.parseLong(ln);
+                    parserContext.delay = delay;
+                    parserContext.index++;
+                } catch (NumberFormatException e) {
+                    Log.e("RequestResponseFlow", "Invalid delay value: " + ln, e);
+                }
+            }
+        } else if (keyword.equalsIgnoreCase(RESPONSE_KEYWORD)) {
+            readResponse(parserContext, newMap);
+        } else {
+            readResponse(parserContext, newMap);
+        }
+    }
+
+    /**
+     * Reads a response from the parser context and adds it to the request-response map.
+     * @param parserContext
+     * @param newMap
+     */
+    private void readResponse(ParserContext parserContext, Map<String, RequestResponse> newMap) {
+
+        String line = parserContext.lines[parserContext.index].trim();
+        String[] parsedLine = line.split(":");
+        String response = null;
+        String keyword = parsedLine[0];
+        if (keyword.equalsIgnoreCase(RESPONSE_KEYWORD)) {
+            response = parsedLine[1].trim();
+            RequestResponse requestResponse = new RequestResponse(parserContext.command, response, parserContext.delay);
+            newMap.put(parserContext.command, requestResponse);
+        } else {
+            Utils.showLogDMessage(InformationTransferManager.getStringResource(R.string.invalid_message_1), InformationTransferManager.getStringResource(R.string.invalid_message_2), false);
+        }
+        parserContext.index++;
+        if( parserContext.index < parserContext.lines.length) {
+            readCommandsAndResponses(parserContext, newMap);
+        } else {
+            Utils.showLogDMessage(InformationTransferManager.getStringResource(R.string.invalid_message_1), InformationTransferManager.getStringResource(R.string.invalid_message_2), false);
         }
     }
 
@@ -88,5 +147,16 @@ public class RequestResponseFlow {
             Utils.showLogDMessage(InformationTransferManager.getStringResource(R.string.invalid_message_1), hexCommandApdu, false);
         }
         return requestResponse;
+    }
+
+    /**
+     * ParserContext is a helper class to hold the state of the parsing process.
+     */
+    private static class ParserContext{
+        private String command;
+        private String response;
+        private long delay;
+        private String[] lines;
+        private int index;
     }
 }

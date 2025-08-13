@@ -312,7 +312,6 @@ public class MainActivity extends AppCompatActivity {
                  * @param view
                  * @param fileContentInText
                  */
-                FileHandler.setCommandsAndResponses(fileContentInText);
 
                 EmulatorApplication application = EmulatorApplication.getInstance();
                 application.getRequestResponseFlow().setCommandsAndResponses(fileContentInText);
@@ -323,7 +322,7 @@ public class MainActivity extends AppCompatActivity {
                 // set response size
                 InformationTransferManager.setResponseSize(FileHandler.responses.size());
 
-                Utils.showLogDMessage(InformationTransferManager.getStringResource(R.string.select_file_tag), "\"" + "Test" + "\" "
+                Utils.showLogDMessage(InformationTransferManager.getStringResource(R.string.select_file_tag), "\"" + "Remote Upload" + "\" "
                         + InformationTransferManager.getStringResource(R.string.snack_bar_message_3) + " "
                         + InformationTransferManager.getStringResource(R.string.snack_bar_message_4) + " "
                         + InformationTransferManager.getCommandSize() + " "
