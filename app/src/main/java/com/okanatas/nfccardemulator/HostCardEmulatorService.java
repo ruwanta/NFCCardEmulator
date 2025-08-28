@@ -51,6 +51,7 @@ public class HostCardEmulatorService extends HostApduService {
                 switch (hexCommandApdu.substring(2, 4)) {
                     case ISOProtocol.INS_SELECT:
                         requestResponse = responseHandler.selectCase(hexCommandApdu);
+                        responseApdu = requestResponse.getResponseApdu();
                         break;
                     case ISOProtocol.INS_READ_BINARY:
                         responseApdu = ResponseHandler2.readBinaryCase();
@@ -72,6 +73,7 @@ public class HostCardEmulatorService extends HostApduService {
                         break;
                     case ISOProtocol.INS_GET_PROCESSING_OPTIONS:
                         requestResponse = responseHandler.getProcessingOptionCase(hexCommandApdu);
+                        responseApdu = requestResponse.getResponseApdu();
                         break;
                     case ISOProtocol.INS_GENERATE_APPLICATION_CRYPTOGRAM:
                         responseApdu = ResponseHandler2.generateApplicationCryptogramCase();

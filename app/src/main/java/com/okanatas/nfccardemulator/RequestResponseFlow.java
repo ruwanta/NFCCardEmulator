@@ -2,6 +2,8 @@ package com.okanatas.nfccardemulator;
 
 import android.util.Log;
 
+import com.okanatas.nfccardemulator.collections.WildcardMap;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -12,7 +14,7 @@ import java.util.Map;
  */
 public class RequestResponseFlow {
 
-    private Map<String, RequestResponse> requestResponseMap = new HashMap<>();
+    private WildcardMap<RequestResponse> requestResponseMap = new WildcardMap<>();
 
     /** Command keyword for the txt file */
     private static final String COMMAND_KEYWORD = InformationTransferManager.getStringResource(R.string.c_apdu_keyword);
@@ -26,7 +28,7 @@ public class RequestResponseFlow {
      */
     public void setCommandsAndResponses(String fileContentInText){
         // clear ArrayList elements for a new file initialization
-        Map<String, RequestResponse> newMap = new HashMap<>();
+        WildcardMap<RequestResponse> newMap = new WildcardMap<>();
 
 
         // store the organized content line by line
@@ -47,7 +49,7 @@ public class RequestResponseFlow {
      * @param parserContext
      * @param newMap
      */
-    private void readCommandsAndResponses(ParserContext parserContext, Map<String, RequestResponse> newMap) {
+    private void readCommandsAndResponses(ParserContext parserContext, WildcardMap<RequestResponse> newMap) {
         String line = parserContext.lines[parserContext.index].trim();
         String[] parsedLine = line.split(":");
         String command = null;
@@ -61,7 +63,7 @@ public class RequestResponseFlow {
         }
         if(command != null) {
             int index = parserContext.index;
-            parserContext.command = command;
+            parserContext.command = command.trim();
             if (index + 1 < parserContext.lines.length) {
                 parserContext.index = index + 1;
                 readDelayAndResponses(parserContext, newMap);
@@ -78,7 +80,7 @@ public class RequestResponseFlow {
      * @param parserContext
      * @param newMap
      */
-    private void readDelayAndResponses(ParserContext parserContext, Map<String, RequestResponse> newMap) {
+    private void readDelayAndResponses(ParserContext parserContext, WildcardMap<RequestResponse> newMap) {
         String line = parserContext.lines[parserContext.index].trim();
         String[] parsedLine = line.split(":");
 
@@ -108,7 +110,7 @@ public class RequestResponseFlow {
      * @param parserContext
      * @param newMap
      */
-    private void readResponse(ParserContext parserContext, Map<String, RequestResponse> newMap) {
+    private void readResponse(ParserContext parserContext, WildcardMap<RequestResponse> newMap) {
 
         String line = parserContext.lines[parserContext.index].trim();
         String[] parsedLine = line.split(":");
