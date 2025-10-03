@@ -4,8 +4,6 @@ import android.util.Log;
 
 import com.okanatas.nfccardemulator.collections.WildcardMap;
 
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Structure holding a graph of request and its response.
