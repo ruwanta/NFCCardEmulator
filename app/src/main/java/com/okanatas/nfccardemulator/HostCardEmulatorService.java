@@ -4,6 +4,7 @@ import android.nfc.cardemulation.HostApduService;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 
 /**
  * This class was created for the Host Based Card Emulator Service.
@@ -94,16 +95,28 @@ public class HostCardEmulatorService extends HostApduService {
 
         if(requestResponse != null) {
             //Handled response with delay
-            responseApdu = requestResponse.getResponseApdu();
+            responseApdu = requestResponse.getResponseApdu(); // Get the response bytes
             long delay = requestResponse.getDelay();
-            if(delay < 0) {
-                delay = 0; // Ensure non-negative delay
-            } else {
-                final String responseApduInHex = Utils.toHexString(responseApdu);
-                new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                    handleCommunicationMessage(commandApduInHex, responseApduInHex);
-                }, delay); // Delay in milliseconds
+
+            if (delay > 0) {
+                try {
+                    // WARNING: Blocking the processCommandApdu thread.
+                    // This is to emulate response delays, to simulate error cases.
+                    Log.d("HCE_DELAY", "Intentionally delaying APDU response by " + delay + "ms");
+                    Thread.sleep(delay);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt(); // Restore interrupt status
+                    Log.w("HCE_DELAY", "APDU delay interrupted");
+                    // Potentially return an error APDU here
+                    return Utils.hexStringToByteArray(ISOProtocol.SW_COMMAND_ABORTED);
+                }
             }
+
+            final String responseApduInHex = Utils.toHexString(responseApdu);
+            // Log immediately or after delay, but the response is now delayed by Thread.sleep()
+            handleCommunicationMessage(commandApduInHex, responseApduInHex); // Or post this if it needs main thread
+
+
         } else {
             handleCommunicationMessage(commandApduInHex, Utils.toHexString(responseApdu));
         }

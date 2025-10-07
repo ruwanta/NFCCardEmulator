@@ -86,16 +86,20 @@ public class RequestResponseFlow {
         String keyword = parsedLine[0];
         parserContext.delay = 0;
         if (keyword.equalsIgnoreCase(DELAY_KEYWORD)) {
-            if((parsedLine[1].length() % 2) == 0){
-                String ln = parsedLine[1];
-                try{
-                    delay = Long.parseLong(ln);
-                    parserContext.delay = delay;
-                    parserContext.index++;
-                } catch (NumberFormatException e) {
-                    Log.e("RequestResponseFlow", "Invalid delay value: " + ln, e);
-                }
+            String ln = parsedLine[1];
+            if (ln == null || ln.isEmpty()) {
+                Utils.showLogDMessage(InformationTransferManager.getStringResource(R.string.invalid_message_1), InformationTransferManager.getStringResource(R.string.invalid_message_2), false);
+                return;
             }
+            ln = ln.trim();
+            try{
+                delay = Long.parseLong(ln);
+                parserContext.delay = delay;
+                parserContext.index++;
+            } catch (NumberFormatException e) {
+                Log.e("RequestResponseFlow", "Invalid delay value: " + ln, e);
+            }
+            readResponse(parserContext, newMap);
         } else if (keyword.equalsIgnoreCase(RESPONSE_KEYWORD)) {
             readResponse(parserContext, newMap);
         } else {
