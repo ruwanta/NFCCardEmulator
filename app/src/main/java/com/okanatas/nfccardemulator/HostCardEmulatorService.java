@@ -77,7 +77,7 @@ public class HostCardEmulatorService extends HostApduService {
                         responseApdu = requestResponse.getResponseApdu();
                         break;
                     case ISOProtocol.INS_GENERATE_APPLICATION_CRYPTOGRAM:
-                        responseApdu = ResponseHandler2.generateApplicationCryptogramCase();
+                        requestResponse = responseHandler.getProcessingOptionCase(hexCommandApdu);
                         break;
                     case ISOProtocol.INS_GET_DATA:
                         responseApdu = ResponseHandler2.getDataCase();

@@ -88,7 +88,7 @@ public class RequestResponseFlow {
         if (keyword.equalsIgnoreCase(DELAY_KEYWORD)) {
             String ln = parsedLine[1];
             if (ln == null || ln.isEmpty()) {
-                Utils.showLogDMessage(InformationTransferManager.getStringResource(R.string.invalid_message_1), InformationTransferManager.getStringResource(R.string.invalid_message_2), false);
+                Utils.showLogDMessage(InformationTransferManager.getStringResource(R.string.invalid_message_1), InformationTransferManager.getStringResource(R.string.invalid_message_1), false);
                 return;
             }
             ln = ln.trim();
@@ -123,13 +123,13 @@ public class RequestResponseFlow {
             RequestResponse requestResponse = new RequestResponse(parserContext.command, response, parserContext.delay);
             newMap.put(parserContext.command, requestResponse);
         } else {
-            Utils.showLogDMessage(InformationTransferManager.getStringResource(R.string.invalid_message_1), InformationTransferManager.getStringResource(R.string.invalid_message_2), false);
+            Utils.showLogDMessage(InformationTransferManager.getStringResource(R.string.invalid_message_1), InformationTransferManager.getStringResource(R.string.invalid_message_1), false);
         }
         parserContext.index++;
         if( parserContext.index < parserContext.lines.length) {
             readCommandsAndResponses(parserContext, newMap);
         } else {
-            Utils.showLogDMessage(InformationTransferManager.getStringResource(R.string.invalid_message_1), InformationTransferManager.getStringResource(R.string.invalid_message_2), false);
+            Utils.showLogDMessage(InformationTransferManager.getStringResource(R.string.invalid_message_1), InformationTransferManager.getStringResource(R.string.invalid_message_1), false);
         }
     }
 

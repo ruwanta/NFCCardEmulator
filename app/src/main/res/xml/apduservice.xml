@@ -26,6 +26,7 @@
         <aid-filter android:name="A0000000043060" /> <!-- mastercard maestro debit -->
         <aid-filter android:name="A0000000046000" /> <!-- mastercard cirrus atm card -->
         <aid-filter android:name="A0000000050001" /> <!-- mastercard maestro uk -->
+        <aid-filter android:name="A0000000041010010203"/>
 
     </aid-group>
 </host-apdu-service>

@@ -57,7 +57,7 @@ public class FileHandler {
                     responses.add(parsedLine[1]);
                     Utils.showLogDMessage(InformationTransferManager.getStringResource(R.string.response_from_file_text), parsedLine[1], false);
                 }else {
-                    Utils.showLogDMessage(InformationTransferManager.getStringResource(R.string.response_from_file_text), InformationTransferManager.getStringResource(R.string.invalid_message_2), false);
+                    Utils.showLogDMessage(InformationTransferManager.getStringResource(R.string.response_from_file_text), InformationTransferManager.getStringResource(R.string.invalid_message_2) + ": " +parsedLine[0], false);
                 }
             }
         }

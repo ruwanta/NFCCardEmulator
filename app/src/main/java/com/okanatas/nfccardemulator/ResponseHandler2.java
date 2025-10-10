@@ -162,17 +162,16 @@ public class ResponseHandler2 {
      * Command APDU - Generate Application Cryptogram Case.
      * @return response APDU.
      */
-    static byte[] generateApplicationCryptogramCase(){
+    public RequestResponse generateApplicationCryptogramCase(String hexCommandApdu){
         byte[] responseApdu = Utils.hexStringToByteArray(ISOProtocol.SW_COMMAND_ABORTED);
         selectedInsDescription = InformationTransferManager.getStringResource(R.string.ins_generate_app_cryptogram);
 
-        for(int i = 0; i < FileHandler.commands.size(); i++){
-            if(ISOProtocol.INS_GENERATE_APPLICATION_CRYPTOGRAM.equals(FileHandler.commands.get(i).substring(2,4))){
-                responseApdu = Utils.hexStringToByteArray(FileHandler.responses.get(i));
-                break;
-            }
+        RequestResponse requestResponse = requestResponseFlow.getRequestResponse(hexCommandApdu);
+        if(requestResponse == null) {
+            requestResponse = createDefaultResponse(hexCommandApdu, ISOProtocol.SW_RECORD_NOT_FOUND);
+            Utils.showLogDMessage(InformationTransferManager.getStringResource(R.string.invalid_message_1), InformationTransferManager.getStringResource(R.string.invalid_message_2), false);
         }
-        return responseApdu;
+        return requestResponse;
     }
 
     /**
